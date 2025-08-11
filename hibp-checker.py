@@ -32,9 +32,9 @@ class HaveIBeenPwnedChecker:
         print(f"🔍 Checking breaches for: {email}")
         
         try:
-            # Send the GET request to the HIBP API
+            # Send the GET request to the HIBP API with truncateResponse=false for full details
             response = requests.get(
-                f'{self.api_url}/breachedaccount/{email}', 
+                f'{self.api_url}/breachedaccount/{email}?truncateResponse=false', 
                 headers=self.headers,
                 timeout=10
             )
@@ -58,22 +58,61 @@ class HaveIBeenPwnedChecker:
             else:
                 # Parse the response and extract breach information
                 breaches_data = response.json()
-                breach_names = [breach['Name'] for breach in breaches_data]
                 
-                print(f"⚠️ Email found in {len(breach_names)} breach(es):")
-                for i, breach in enumerate(breaches_data[:5], 1):
-                    # Handle missing fields gracefully
-                    name = breach.get('Name', 'Unknown')
-                    breach_date = breach.get('BreachDate', 'Unknown date')
-                    pwn_count = breach.get('PwnCount', 0)
+                print(f"⚠️ Email found in {len(breaches_data)} breach(es):")
+                print("=" * 80)
+                
+                for i, breach in enumerate(breaches_data, 1):
+                    print(f"\n🔴 BREACH #{i}")
+                    print("-" * 50)
                     
+                    # Basic info
+                    print(f"Name: {breach.get('Name', 'Unknown')}")
+                    print(f"Title: {breach.get('Title', 'Unknown')}")
+                    print(f"Domain: {breach.get('Domain', 'Unknown')}")
+                    print(f"Breach Date: {breach.get('BreachDate', 'Unknown')}")
+                    print(f"Added to HIBP: {breach.get('AddedDate', 'Unknown')}")
+                    print(f"Last Modified: {breach.get('ModifiedDate', 'Unknown')}")
+                    
+                    # Impact
+                    pwn_count = breach.get('PwnCount', 0)
                     if pwn_count > 0:
-                        print(f"  {i}. {name} - {breach_date} ({pwn_count:,} accounts)")
+                        print(f"Accounts Affected: {pwn_count:,}")
                     else:
-                        print(f"  {i}. {name} - {breach_date} (Unknown account count)")
+                        print("Accounts Affected: Unknown")
+                    
+                    # Data types compromised
+                    data_classes = breach.get('DataClasses', [])
+                    if data_classes:
+                        print(f"Data Compromised: {', '.join(data_classes)}")
+                    else:
+                        print("Data Compromised: Unknown")
+                    
+                    # Verification status
+                    print(f"Verified: {'Yes' if breach.get('IsVerified', False) else 'No'}")
+                    print(f"Fabricated: {'Yes' if breach.get('IsFabricated', False) else 'No'}")
+                    print(f"Sensitive: {'Yes' if breach.get('IsSensitive', False) else 'No'}")
+                    print(f"Retired: {'Yes' if breach.get('IsRetired', False) else 'No'}")
+                    print(f"Spam List: {'Yes' if breach.get('IsSpamList', False) else 'No'}")
+                    
+                    # Description
+                    description = breach.get('Description', '')
+                    if description:
+                        # Remove HTML tags for cleaner output
+                        import re
+                        clean_description = re.sub(r'<[^>]+>', '', description)
+                        print(f"Description: {clean_description[:200]}{'...' if len(clean_description) > 200 else ''}")
+                    
+                    if i < len(breaches_data):
+                        print("\n" + "="*80)
                 
-                if len(breaches_data) > 5:
-                    print(f"  ... and {len(breaches_data) - 5} more breaches")
+                # Ask if user wants detailed view for specific breach
+                if len(breaches_data) > 1:
+                    print(f"\n📋 Would you like detailed info on a specific breach?")
+                    breach_choice = input(f"Enter breach number (1-{len(breaches_data)}) or 'n' to skip: ").strip()
+                    
+                    if breach_choice.isdigit() and 1 <= int(breach_choice) <= len(breaches_data):
+                        self.show_detailed_breach_info(breaches_data[int(breach_choice) - 1])
                 
                 return breaches_data
                 
@@ -89,6 +128,49 @@ class HaveIBeenPwnedChecker:
         except json.JSONDecodeError:
             print("❌ Error parsing response from API")
             return None
+    
+    def show_detailed_breach_info(self, breach):
+        """Show detailed information for a specific breach"""
+        print("\n" + "="*80)
+        print(f"🔍 DETAILED BREACH INFORMATION: {breach.get('Name', 'Unknown')}")
+        print("="*80)
+        
+        print(f"Full Title: {breach.get('Title', 'N/A')}")
+        print(f"Website Domain: {breach.get('Domain', 'N/A')}")
+        print(f"Date of Breach: {breach.get('BreachDate', 'N/A')}")
+        print(f"Date Added to HIBP: {breach.get('AddedDate', 'N/A')}")
+        print(f"Last Updated: {breach.get('ModifiedDate', 'N/A')}")
+        
+        pwn_count = breach.get('PwnCount', 0)
+        print(f"Total Accounts Compromised: {pwn_count:,}" if pwn_count > 0 else "Accounts Compromised: Unknown")
+        
+        # Logo path
+        logo_path = breach.get('LogoPath', '')
+        if logo_path:
+            print(f"Logo: https://haveibeenpwned.com{logo_path}")
+        
+        # Data classes with better formatting
+        data_classes = breach.get('DataClasses', [])
+        if data_classes:
+            print(f"\n📊 Types of Data Compromised:")
+            for data_type in data_classes:
+                print(f"  • {data_type}")
+        
+        # Status flags
+        print(f"\n🏷️ Status Information:")
+        print(f"  • Verified by HIBP: {'Yes' if breach.get('IsVerified', False) else 'No'}")
+        print(f"  • Fabricated/Fake: {'Yes' if breach.get('IsFabricated', False) else 'No'}")
+        print(f"  • Contains Sensitive Data: {'Yes' if breach.get('IsSensitive', False) else 'No'}")
+        print(f"  • Retired from HIBP: {'Yes' if breach.get('IsRetired', False) else 'No'}")
+        print(f"  • Spam List: {'Yes' if breach.get('IsSpamList', False) else 'No'}")
+        
+        # Full description
+        description = breach.get('Description', '')
+        if description:
+            import re
+            clean_description = re.sub(r'<[^>]+>', '', description)
+            print(f"\n📝 Full Description:")
+            print(f"{clean_description}")
     
     def check_pwned_passwords(self, password):
         """Check if a password has been pwned using k-anonymity"""
@@ -119,9 +201,22 @@ class HaveIBeenPwnedChecker:
                 if hash_suffix == suffix:
                     count = int(count)
                     print(f"⚠️ Password has been pwned {count:,} times!")
+                    
+                    # Give security advice based on count
+                    if count > 100000:
+                        print("🚨 CRITICAL: This is an extremely common password!")
+                    elif count > 10000:
+                        print("⚠️ HIGH RISK: This password is very commonly used")
+                    elif count > 1000:
+                        print("⚠️ MEDIUM RISK: This password has been seen before")
+                    else:
+                        print("⚠️ LOW RISK: Password found but not very common")
+                    
+                    print("💡 Recommendation: Change this password immediately!")
                     return count
             
             print("✅ Password not found in pwned passwords database")
+            print("👍 This password appears to be secure")
             return 0
             
         except requests.exceptions.RequestException as e:
