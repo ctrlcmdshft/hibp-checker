@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 class HaveIBeenPwnedChecker:
-    def __init__(self):
+def __init__(self):
         # Load the environment variables from .env
         load_dotenv()
         
