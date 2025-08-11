@@ -1,80 +1,199 @@
 # HIBP Email & Password Checker
 
-Python script to check if your email got breached or your password was leaked. Uses the Have I Been Pwned API.
+Python script to check if your email got breached or password was leaked. Uses the Have I Been Pwned API to dig through data breaches and paste dumps.
 
-## What it does
+## What this does
 
 - Check if your email shows up in data breaches
 - See if passwords have been compromised (doesn't send your actual password)
+- Look through paste dumps (Pastebin, etc.) for your email
+- Browse the entire HIBP database
+- Search for specific breach details
+- Find breaches affecting certain domains
+- See what types of data get stolen in breaches
 - Save results to files
 - Basic email validation
 
-## Setup
+## Getting it running
 
-You need Python 3.7+ and these packages:
+Need Python 3.7+ and a couple packages:
 ```bash
 pip install requests python-dotenv
 ```
 
-Get an API key from https://haveibeenpwned.com/API/Key (costs about $3.50/month)
-
-Create a `.env` file in the same folder:
+Or just use:
+```bash
+pip install -r requirements.txt
 ```
-HIBP_API_KEY=paste_your_key_here
+
+**You need an API key** from https://haveibeenpwned.com/API/Key - costs about $3.50/month but worth it for the data access.
+
+Make a `.env` file in the same folder:
+```
+HIBP_API_KEY=your_actual_key_here
+```
+
+### Requirements.txt
+```
+requests>=2.25.1
+python-dotenv>=0.19.0
 ```
 
 ## How to use it
 
-Run the script:
 ```bash
 python hibp_checker.py
 ```
 
-You'll get a menu with 4 options:
-1. Check email for breaches
-2. Check password (secure)
-3. Check both email and password
-4. Exit
+You get 9 options to pick from:
+1. **Check email for breaches** - See if your email is in any breaches
+2. **Check password** - Test if password has been pwned
+3. **Check both** - Do email and password at once
+4. **Check email in pastes** - Look through Pastebin dumps
+5. **Get all breaches** - Browse the whole HIBP database
+6. **Search specific breach** - Look up Adobe, LinkedIn, etc. by name
+7. **Search by domain** - Find breaches affecting gmail.com, yahoo.com, etc.
+8. **View data types** - See what kinds of stuff gets stolen
+9. **Exit**
+
+## What you'll see
 
 ### Email checking
-Type in an email and it shows you any breaches it's been in:
+Shows you detailed breach info:
 ```
-Email found in 2 breaches:
-  1. Adobe - 2013-10-04 (152,445,165 accounts)
-  2. LinkedIn - 2012-05-05 (164,611,595 accounts)
+BREACH #1
+--------------------------------------------------
+Name: Adobe
+Domain: adobe.com
+Breach Date: 2013-10-04
+Accounts Affected: 152,445,165
+Data Compromised: Email addresses, Password hints, Passwords, Usernames
+Verified: Yes
+Description: In October 2013, 153 million Adobe accounts were breached...
 ```
 
 ### Password checking
-Enter a password (hidden input) and it checks if it's been leaked. Uses k-anonymity so your actual password never gets sent anywhere.
+Uses a secure method that doesn't send your actual password:
+- Only sends first 5 characters of a hash
+- Your password never leaves your computer
+- Shows risk level:
+  - 🚨 **CRITICAL**: Super common password, change it now
+  - ⚠️ **HIGH RISK**: Very commonly used
+  - ⚠️ **MEDIUM RISK**: Seen this before
+  - ⚠️ **LOW RISK**: Found but not too common
+  - ✅ **SECURE**: Not in the database
 
-## Common problems
+### Paste dumps
+Finds if your email appears in data dumps:
+```
+PASTE #1
+----------------------------------------
+Source: Pastebin
+ID: 8VN0a4Cl
+Title: Database dump
+Date: 2019-03-01
+Email Count: 12,345
+```
 
-**API key not found** - Make sure your `.env` file is set up correctly
+### Database browsing
+- **All breaches**: See recent major breaches
+- **Specific lookups**: Get full details on any breach
+- **Domain search**: Check what breaches hit specific websites
+- **Data types**: Browse all 30+ types of data that gets stolen
 
-**Rate limit hit** - Wait a few minutes, the API has limits
+## When stuff breaks
 
-**Network errors** - Check your connection or try again later
+**"API key not found"** - Check your .env file has `HIBP_API_KEY=your_key`
 
-**Invalid API key** - Double-check the key from HIBP and make sure your subscription is active
+**"Rate limit exceeded"** - Slow down, you're making too many requests
+
+**Network errors** - Internet connection issues, try again later
+
+**"Invalid API key"** - Double-check you copied the key right and subscription is active
+
+**"Unauthorized"** - API key might be expired
 
 ## Output files
 
-When you save results, you get JSON files like `hibp_results_20250811_143022.json` with all the breach details.
+Save results to JSON files like `hibp_results_20250811_143022.json`:
+```json
+{
+  "email": "user@example.com",
+  "check_date": "2025-08-11T14:30:22.123456",
+  "breach_count": 2,
+  "breaches": [
+    {
+      "Name": "Adobe",
+      "BreachDate": "2013-10-04",
+      "PwnCount": 152445165,
+      "DataClasses": ["Email addresses", "Passwords"]
+    }
+  ]
+}
+```
 
-## Code sources
+## Ways to use this
+
+**Check your own stuff**:
+```bash
+python hibp_checker.py
+# Pick option 3, enter your email and password
+```
+
+**Research your company**:
+```bash
+python hibp_checker.py  
+# Pick option 7, enter your company domain
+```
+
+**Look up specific breaches**:
+```bash
+python hibp_checker.py
+# Pick option 6, search "Adobe" or "LinkedIn"
+```
+
+## Code I borrowed
 
 Email validation regex from: https://github.com/ianpottinger/Python3/blob/24fbc83162bc77a9a4a383be5d2c134274310ce7/regex.py (MIT License)
 
-Used pattern:
 ```python
 pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 return re.match(pattern, email) is not None
 ```
 
+## Issues
+
+Found a bug? Got an idea? Open an issue:
+[Create new issue](https://github.com/yourusername/hibp-checker/issues/new)
+
 ## License
 
 MIT License - use it however you want.
 
-## Disclaimer
+## Don't be a creep
 
-This is for checking your own accounts. Don't be creepy and check other people's stuff without permission.
+This is for checking your own stuff or legitimate security research. Don't:
+- Check other people's emails without permission
+- Abuse the API or ignore rate limits
+- Use this for harassment or stalking
+
+Be responsible about it.
+
+## Contributing
+
+Want to add features?
+1. Fork it
+2. Make a branch
+3. Code something useful
+4. Test it properly
+5. Send a pull request
+
+## Recent changes
+
+**v1.0.0**
+- Basic email and password checking
+- Added detailed breach info
+- Paste checking
+- Database browsing
+- File saving
+- Better error handling
