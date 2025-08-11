@@ -1,0 +1,23 @@
+# .env files (API keys, secrets)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Results/output
+hibp_results_*.json
+hibp_pastes_*.json
+hibp_all_breaches_*.json
+hibp_domain_*.json
+hibp_data_classes_*.json
+hibp_breach_*.json

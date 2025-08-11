@@ -2,7 +2,8 @@
 
 Python script to check if your email got breached or password was leaked. Uses the Have I Been Pwned API to dig through data breaches and paste dumps.
 
-## What this does
+
+## Features
 
 - Check if your email shows up in data breaches
 - See if passwords have been compromised (doesn't send your actual password)
@@ -11,17 +12,26 @@ Python script to check if your email got breached or password was leaked. Uses t
 - Search for specific breach details
 - Find breaches affecting certain domains
 - See what types of data get stolen in breaches
-- Save results to files
+- Save results to files (cross-platform, uses pathlib)
 - Basic email validation
+- **Type hints** for all major functions
+- **Improved error handling** and user messages
+- **Automated tests** with pytest (see `tests/`)
+- **New CLI options:**
+  - `--quiet` : Suppress most output (only errors)
+  - `--json`  : Output results as JSON
+  - `--version` : Show version and exit
 
 ## Getting it running
 
-Need Python 3.7+ and a couple packages:
-```bash
-pip install requests python-dotenv
-```
 
-Or just use:
+### Requirements
+- Python 3.7+
+- requests
+- python-dotenv
+- pytest (for testing)
+
+Install all dependencies:
 ```bash
 pip install -r requirements.txt
 ```
@@ -33,19 +43,29 @@ Make a `.env` file in the same folder:
 HIBP_API_KEY=your_actual_key_here
 ```
 
-### Requirements.txt
-```
-requests>=2.25.1
-python-dotenv>=0.19.0
-```
+
+
 
 ## How to use it
 
+### Interactive mode
 ```bash
 python hibp_checker.py
 ```
 
-You get 9 options to pick from:
+### CLI mode
+```bash
+python hibp_checker.py --email test@example.com --save
+python hibp_checker.py --password "yourpassword" --json
+python hibp_checker.py --all-breaches --save --quiet
+```
+
+#### Additional CLI Options
+- `--quiet` : Suppress most output (only errors)
+- `--json`  : Output results as JSON
+- `--version` : Show version and exit
+
+You get 9 options to pick from in interactive mode:
 1. **Check email for breaches** - See if your email is in any breaches
 2. **Check password** - Test if password has been pwned
 3. **Check both** - Do email and password at once
@@ -101,6 +121,11 @@ Email Count: 12,345
 - **Domain search**: Check what breaches hit specific websites
 - **Data types**: Browse all 30+ types of data that gets stolen
 
+
+## Security Notice
+- **Never use your real passwords for testing or on the command line.**
+- Your API key and sensitive data should be kept private. `.env` is already in `.gitignore`.
+
 ## When stuff breaks
 
 **"API key not found"** - Check your .env file has `HIBP_API_KEY=your_key`
@@ -132,24 +157,31 @@ Save results to JSON files like `hibp_results_20250811_143022.json`:
 }
 ```
 
+
 ## Ways to use this
 
-**Check your own stuff**:
+**Check your own stuff (interactive):**
 ```bash
 python hibp_checker.py
 # Pick option 3, enter your email and password
 ```
 
-**Research your company**:
+**Research your company (interactive):**
 ```bash
-python hibp_checker.py  
+python hibp_checker.py
 # Pick option 7, enter your company domain
 ```
 
-**Look up specific breaches**:
+**Look up specific breaches (interactive):**
 ```bash
 python hibp_checker.py
 # Pick option 6, search "Adobe" or "LinkedIn"
+```
+
+**Scripted/automated use (CLI):**
+```bash
+python hibp_checker.py --email user@example.com --save --json
+python hibp_checker.py --all-breaches --quiet --json
 ```
 
 ## Code I borrowed
@@ -159,6 +191,14 @@ Email validation regex from: https://github.com/ianpottinger/Python3/blob/24fbc8
 ```python
 pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 return re.match(pattern, email) is not None
+```
+
+
+## Testing
+
+Run all tests:
+```bash
+pytest
 ```
 
 ## Issues
