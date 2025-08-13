@@ -36,7 +36,21 @@ Install all dependencies:
 pip install -r requirements.txt
 ```
 
-**You need an API key** from https://haveibeenpwned.com/API/Key - costs about $3.50/month but worth it for the data access.
+
+**You need an API key** from https://haveibeenpwned.com/API/Key. Pricing (as of August 2025):
+
+- **Pwned 1**: $4.50/month — 10 email searches per minute, up to 25 breached email addresses per domain
+- **Pwned 2**: $22/month — 50 email searches per minute, up to 100 breached email addresses per domain
+- **Pwned 3**: $37.50/month — 100 email searches per minute, up to 500 breached email addresses per domain
+- **Pwned 4**: $163/month — 500 email searches per minute, unlimited breached email addresses per domain
+- **Pwned 5**: $326/month — 1,000 email searches per minute, unlimited breached email addresses per domain, includes domain-level stealer log search
+- **Ultra/Enterprise**: Up to 12,000 RPM and custom pricing for high-volume or enterprise use
+
+See the [official HIBP pricing page](https://haveibeenpwned.com/Subscription) for the latest details.
+
+Most personal email and password checks are free on the HIBP website, but API access for automation requires a paid subscription.
+
+
 
 Make a `.env` file in the same folder:
 ```
@@ -209,6 +223,10 @@ Found a bug? Got an idea? Open an issue:
 ## License
 
 MIT License - use it however you want.
+
+## Attribution
+
+This project uses the Have I Been Pwned API. Data provided by [Have I Been Pwned](https://haveibeenpwned.com/) is licensed under the [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/). Clear and visible attribution to HIBP is required in any public or commercial use of this tool or its data. See the [API documentation](https://haveibeenpwned.com/API/v3) for details.
 
 ## Don't be a creep
 
